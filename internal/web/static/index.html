@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIoT Simulator — AI-4301</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+</head>
+<body>
+<div id="app">
+  <aside id="side">
+    <div class="brand"><img src="icon.svg" alt="" width="34" height="34"><div><b>AIoT Simulator</b><small id="ver">v0.0.1</small></div></div>
+    <nav id="labnav"></nav>
+    <div class="side-foot">
+      <button class="btn small" data-act="report">Download evidence report</button>
+      <button class="btn small ghost" data-act="quit">Quit simulator</button>
+      <div class="muted tiny" id="wsPath"></div>
+    </div>
+  </aside>
+  <main id="main">
+    <header id="topbar"></header>
+    <div id="content"><section id="guide" class="card"></section><section id="work"></section></div>
+    <section id="console" class="card"><div class="row"><b>Event log</b><span class="spacer"></span><button class="btn tiny ghost" data-act="clearlog">Clear</button></div><div id="logbox"></div></section>
+  </main>
+  <aside id="bench">
+    <div class="card"><h3>Virtual Arduino</h3><div id="boardCtl"></div></div>
+    <div class="card"><h3>Environment</h3><div id="envCtl"></div></div>
+    <div class="card grow"><div class="row"><h3>Serial Monitor</h3><span class="spacer"></span><label class="tiny">Monitor baud <select id="monBaud"></select></label><button class="btn tiny ghost" data-act="serialclear">Clear</button></div><div id="serialbox"></div></div>
+  </aside>
+</div>
+<div id="toast"></div>
+<script src="labs.js"></script>
+<script src="app.js"></script>
+<script src="panels.js"></script>
+</body>
+</html>

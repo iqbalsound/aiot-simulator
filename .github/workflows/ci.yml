@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: gofmt
+        run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+      - name: vet
+        run: go vet ./...
+      - name: test (race detector)
+        run: go test -race -count=1 ./...
+
+  package:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Install packaging tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fakeroot rpm nsis python3-pil
+      - name: Build binaries and installers
+        run: ./build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installers
+          path: dist/*
+          if-no-files-found: error
+
+  smoke-deb:
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: installers }
+      - name: Install the DEB and start the simulator
+        run: |
+          sudo apt-get install -y ./aiot-simulator_*_amd64.deb
+          aiot-simulator --version
+          aiot-simulator --no-browser --serve --port 8765 --mqtt-port 18830 --workspace "$RUNNER_TEMP/ws" &
+          for i in $(seq 1 20); do curl -fs http://127.0.0.1:8765/api/state && break; sleep 1; done | head -c 200; echo
+          curl -fs http://127.0.0.1:8765/api/state | grep -q '"version"'
+      - name: Remove
+        run: sudo apt-get remove -y aiot-simulator && ! command -v aiot-simulator
+
+  smoke-rpm:
+    needs: package
+    runs-on: ubuntu-latest
+    container: rockylinux:9
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: installers }
+      - name: Install the RPM and start the simulator
+        run: |
+          dnf install -y ./aiot-simulator-*.x86_64.rpm
+          aiot-simulator --version
+          aiot-simulator --no-browser --serve --port 8765 --mqtt-port 18830 --workspace /tmp/ws &
+          for i in $(seq 1 20); do curl -fs http://127.0.0.1:8765/api/state >/dev/null && break; sleep 1; done
+          curl -fs http://127.0.0.1:8765/api/state | grep -q '"version"'
+      - name: Remove
+        run: dnf remove -y aiot-simulator
+
+  smoke-windows:
+    needs: package
+    runs-on: windows-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: installers }
+      - name: Silent install, run, uninstall
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem -Filter '*-setup.exe' | Select-Object -First 1
+          Start-Process -FilePath $setup.FullName -ArgumentList '/S' -Wait
+          $dir = Join-Path $env:ProgramFiles 'AIoT Simulator'
+          $exe = Join-Path $dir 'aiot-simulator.exe'
+          if (-not (Test-Path $exe)) { throw 'installer did not install the program' }
+          $p = Start-Process -FilePath $exe -ArgumentList '--no-browser','--serve','--port','8765','--mqtt-port','18830' -PassThru
+          $state = $null
+          for ($i = 0; $i -lt 30 -and -not $state; $i++) {
+            try { $state = Invoke-RestMethod http://127.0.0.1:8765/api/state } catch { Start-Sleep 1 }
+          }
+          if (-not $state.version) { throw 'simulator did not answer on port 8765' }
+          Write-Host "Simulator $($state.version) answered; MQTT port $($state.mqtt.port)"
+          Stop-Process -Id $p.Id -Force
+          Start-Process -FilePath (Join-Path $dir 'Uninstall.exe') -ArgumentList '/S',"_?=$dir" -Wait
+          if (Test-Path $exe) { throw 'uninstall left the program behind' }

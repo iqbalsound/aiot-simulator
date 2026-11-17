@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=AIoT Simulator
+GenericName=AI-4301 Lab Simulator
+Comment=Virtual sensors, MQTT broker and ML labs for Artificial Intelligence of Things (AI-4301)
+Exec=aiot-simulator
+Icon=aiot-simulator
+Terminal=false
+Categories=Education;Science;Electronics;
+Keywords=AIoT;IoT;MQTT;Arduino;TinyML;Sensors;
+StartupNotify=true

@@ -1,0 +1,8 @@
+AIoT Simulator 0.0.1 - companion software for course AI-4301 (Artificial Intelligence of Things)
+
+Copyright (C) 2026. All rights reserved.
+Provided for educational use by students and instructors of the course.
+The software is provided "as is", without warranty of any kind.
+
+The simulator emulates hardware and cloud services for teaching. Results (timings, memory
+sizes, file sizes) are estimates and do not replace supervised work on real hardware.

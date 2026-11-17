@@ -1,0 +1,8 @@
+build/
+dist/
+*.exe
+*.deb
+*.rpm
+*.test
+.idea/
+.vscode/
