@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
+
 // Package app wires the simulator engine, MQTT broker and lab logic to an HTTP API
 // consumed by the embedded web UI.
 package app
@@ -148,11 +150,13 @@ type App struct {
 	anomN    int
 
 	// ML state (labs 6, 7, 9)
-	cmf  *comfortSet
-	nn   *nnResult
-	mcu  *mcuResult
-	proj *projectModel
-	hist map[string]any // last result per feature for the report
+	cmf     *comfortSet
+	nn      *nnResult
+	mcu     *mcuResult
+	proj    *projectModel
+	hist    map[string]any // last result per feature for the report
+	charts  map[string][]chartSpec
+	student Student
 
 	// progress
 	prog map[string]bool
@@ -170,7 +174,7 @@ func New(version, dir string, seed int64) *App {
 	a := &App{Version: version, Dir: dir, hub: newHub(), monitorBaud: 9600, logFields: 4,
 		autoVary: true, users: map[string]string{}, allowAnon: true, topics: map[string]*topicVal{},
 		lastVals: map[string]float64{}, prog: map[string]bool{}, ev: map[string]string{},
-		hist: map[string]any{}, started: time.Now(), quit: make(chan struct{})}
+		hist: map[string]any{}, charts: map[string][]chartSpec{}, started: time.Now(), quit: make(chan struct{})}
 	a.S = sim.NewSensors(seed)
 	a.B = sim.NewBoard(a.S)
 	a.B.OnTick = a.onTick
@@ -179,6 +183,7 @@ func New(version, dir string, seed int64) *App {
 	a.anomaly = anomalyCfg{}
 	os.MkdirAll(dir, 0o755)
 	a.loadProgress()
+	a.loadStudent()
 	return a
 }
 
@@ -320,6 +325,9 @@ func (a *App) Handler(static fs.FS) http.Handler {
 		w.Write([]byte(a.report()))
 	})
 	mux.HandleFunc("GET /api/stream", a.hStream)
+	a.routesMeta(get, post)
+	a.routesPDF(mux)
+	a.routesCircuit(get, post)
 	a.routesData(get, post, mux)
 	a.routesNet(get, post)
 	a.routesML(get, post, mux)
@@ -445,7 +453,7 @@ func (a *App) state() map[string]any {
 	st := map[string]any{
 		"version": a.Version, "workspace": a.Dir, "monitorBaud": a.monitorBaud, "autoVary": a.autoVary,
 		"logging": logging, "rows": rows, "dataSource": src, "logFields": a.logFields,
-		"serialTail": tail, "dht22": a.S.DHT22,
+		"serialTail": tail, "dht22": a.S.DHT22, "student": a.student, "author": Author, "authorTitle": AuthorTitle, "authorDept": AuthorDept,
 	}
 	a.mu.Unlock()
 	st["board"] = a.B.State()

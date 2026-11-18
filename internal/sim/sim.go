@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
+
 // Package sim models the AI-4301 lab kit: DHT11/DHT22, PIR, LDR (voltage divider),
 // an optional HC-SR04 distance sensor, an MPU6050 vibration channel, and a virtual
 // Arduino that prints structured serial lines exactly like the manual's sketches.

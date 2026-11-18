@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
+
 package app
 
 import (
@@ -26,7 +28,7 @@ var labDefs = map[int]labDef{
 		[]item{{"ssh_task", "Key-based SSH steps researched for viva"}}},
 	2: {"Interfacing Sensors with Arduino/Raspberry Pi GPIO Pins",
 		[]item{{"wiring_ok", "All three sensors wired to the correct pins"}, {"serial_dht", "DHT11-only sketch read in Serial Monitor"}, {"serial_combined", "Combined CSV sketch printing one line per cycle"}},
-		[]item{{"task2", "Extra sensor wired and reported as a 5th field"}}},
+		[]item{{"task2", "Extra sensor wired and reported as a 5th field"}, {"circuit_run", "Circuit built visually and run in the Circuit Lab"}}},
 	3: {"Sensor Data Collection and Preprocessing",
 		[]item{{"rows200", "sensor_log.csv holds at least 200 logged rows"}, {"cleaned", "Missing / malformed rows removed or interpolated"}, {"smoothed", "Rolling-mean (window 5) temperature plotted"}},
 		[]item{{"median", "Median filter vs rolling mean compared on the light column"}}},
@@ -73,7 +75,7 @@ var labDefs = map[int]labDef{
 // manualKeys are the checkboxes a student may tick by hand in the UI.
 var manualKeys = map[string]bool{"inventory": true, "verify": true, "ssh_task": true, "dash_live": true,
 	"arch_done": true, "proposal": true, "risk": true, "bottleneck": true, "slides": true, "reflection": true,
-	"midterm": true, "report_export": true, "alert_set": true}
+	"midterm": true, "report_export": true, "alert_set": true, "circuit_run": true}
 
 func (a *App) progressPath() string { return filepath.Join(a.Dir, "progress.json") }
 
@@ -122,8 +124,9 @@ func (a *App) markQuiet(key string) { a.mark(key, "") }
 
 func (a *App) hMark(r *http.Request) (any, error) {
 	var in struct {
-		Key   string `json:"key"`
-		Value *bool  `json:"value"`
+		Key      string `json:"key"`
+		Value    *bool  `json:"value"`
+		Evidence string `json:"evidence"`
 	}
 	if err := decode(r, &in); err != nil {
 		return nil, err
@@ -133,7 +136,11 @@ func (a *App) hMark(r *http.Request) (any, error) {
 	}
 	v := in.Value == nil || *in.Value
 	if v {
-		a.mark(in.Key, "ticked by student")
+		ev := "ticked by student"
+		if e := strings.TrimSpace(in.Evidence); e != "" && len(e) <= 200 {
+			ev = e
+		}
+		a.mark(in.Key, ev)
 	} else {
 		a.mu.Lock()
 		delete(a.prog, in.Key)

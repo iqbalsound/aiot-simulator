@@ -6,3 +6,5 @@
 - ML numbers can differ slightly from scikit-learn (native implementations).
 - ARM64 packages (Raspberry Pi) and macOS builds.
 - Code signing for the Windows installer.
+- Circuit Lab: ESP32 / Nano 33 BLE boards, Servo, LCD, I2C, interrupts, breadboard view, sketch export to .ino.
+- PDF reports: embed screenshots of dashboards; signed report IDs for teacher verification.

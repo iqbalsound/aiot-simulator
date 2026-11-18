@@ -4,8 +4,9 @@ VERSION := $(shell cat VERSION)
 .PHONY: run test vet fmt build package clean
 run:      ## dry run from source (opens the simulator, nothing is installed)
 	go run ./cmd/aiot-simulator
-test:     ## unit + API tests with the race detector
+test:     ## Go tests with the race detector + JavaScript tests
 	CGO_ENABLED=1 go test -race ./...
+	node --test web-tests/*.test.js
 vet:
 	go vet ./...
 fmt:      ## fail if any file needs gofmt

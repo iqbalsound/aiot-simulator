@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
+
 // Package web embeds the simulator's browser UI.
 package web
 

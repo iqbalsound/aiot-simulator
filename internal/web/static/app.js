@@ -1,4 +1,5 @@
 "use strict";
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
 // ---------------------------------------------------------------- helpers
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -29,7 +30,7 @@ function toast(msg, err) {
   setTimeout(() => d.remove(), err ? 7000 : 3500);
 }
 async function run(fn) { try { return await fn(); } catch (e) { toast(e.message || String(e), true); } }
-const mark = (key, value = true) => run(async () => { S.progress = await api("/api/progress/mark", { key, value }); renderNav(); renderGuide(); });
+const mark = (key, value = true, evidence) => run(async () => { S.progress = await api("/api/progress/mark", { key, value, evidence }); renderNav(); renderGuide(); });
 
 // ---------------------------------------------------------------- canvas charts
 function prep(cv) {
@@ -42,9 +43,9 @@ function prep(cv) {
   const cs = getComputedStyle(document.documentElement);
   return { ctx, w, h, text: cs.getPropertyValue("--muted").trim() || "#888", line: cs.getPropertyValue("--line").trim() || "#444", fg: cs.getPropertyValue("--text").trim() || "#fff" };
 }
-const COLORS = ["#2dd4bf", "#38bdf8", "#fbbf24", "#f87171", "#a78bfa", "#4ade80"];
+const palette = () => { const cs = getComputedStyle(document.documentElement); return [1, 2, 3, 4, 5, 6].map(i => cs.getPropertyValue("--c" + i).trim() || "#2dd4bf"); };
 function chart(cv, series, o = {}) {
-  const c = prep(cv); if (!c) return;
+  const c = prep(cv); if (!c) return; cv._redraw = () => chart(cv, series, o); const COLORS = palette();
   const { ctx, w, h } = c, L = 42, R = 8, T = 18, B = 20;
   let lo = Infinity, hi = -Infinity, n = 0;
   series.forEach(s => { n = Math.max(n, s.data.length); s.data.forEach(v => { if (v !== null && v !== undefined && isFinite(v)) { lo = Math.min(lo, v); hi = Math.max(hi, v); } }); });
@@ -71,7 +72,7 @@ function chart(cv, series, o = {}) {
   series.forEach((s, si) => { if (!s.name) return; ctx.fillStyle = s.color || COLORS[si % COLORS.length]; ctx.fillRect(lx, 4, 10, 8); ctx.fillStyle = c.text; ctx.fillText(s.name, lx + 14, 12); lx += 22 + ctx.measureText(s.name).width; });
 }
 function bars(cv, labels, values, o = {}) {
-  const c = prep(cv); if (!c) return;
+  const c = prep(cv); if (!c) return; cv._redraw = () => bars(cv, labels, values, o); const COLORS = palette();
   const { ctx, w, h } = c, L = 10, B = 34, T = 14, n = values.length;
   const mx = o.max ?? Math.max(...values, 1e-9), bw = (w - L * 2) / n;
   ctx.font = "11px system-ui";
@@ -84,12 +85,12 @@ function bars(cv, labels, values, o = {}) {
   ctx.textAlign = "left";
 }
 function gauge(cv, v, min, max, label, unit, warn) {
-  const c = prep(cv); if (!c) return;
+  const c = prep(cv); if (!c) return; cv._redraw = () => gauge(cv, v, min, max, label, unit, warn);
   const { ctx, w, h } = c, cx = w / 2, cy = h * 0.82, r = Math.min(w / 2 - 12, h * 0.72);
   const f = Math.max(0, Math.min(1, ((v ?? min) - min) / (max - min))), a0 = Math.PI * 0.85, a1 = Math.PI * 2.15;
   ctx.lineWidth = 13; ctx.lineCap = "round";
   ctx.strokeStyle = c.line; ctx.beginPath(); ctx.arc(cx, cy, r, a0, a1); ctx.stroke();
-  ctx.strokeStyle = (warn !== undefined && v > warn) ? "#f87171" : "#2dd4bf"; ctx.beginPath(); ctx.arc(cx, cy, r, a0, a0 + (a1 - a0) * f); ctx.stroke();
+  ctx.strokeStyle = (warn !== undefined && v > warn) ? getComputedStyle(document.documentElement).getPropertyValue("--bad") : getComputedStyle(document.documentElement).getPropertyValue("--accent"); ctx.beginPath(); ctx.arc(cx, cy, r, a0, a0 + (a1 - a0) * f); ctx.stroke();
   ctx.fillStyle = c.fg; ctx.textAlign = "center"; ctx.font = "bold 22px system-ui"; ctx.fillText(v === null || v === undefined ? "–" : (Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(1)) + unit, cx, cy - 4);
   ctx.font = "12px system-ui"; ctx.fillStyle = c.text; ctx.fillText(label, cx, cy + 18); ctx.textAlign = "left";
 }
@@ -108,7 +109,7 @@ const mkCheck = (it) => `<li class="${it.done ? "done" : ""}">${it.manual ? `<in
 // ---------------------------------------------------------------- layout renderers
 function renderNav() {
   const nav = $("#labnav"); if (!nav) return;
-  nav.innerHTML = S.progress.map(p => {
+  nav.innerHTML = `<button class="nav ${CUR === 0 ? "on" : ""}" data-act="circuit"><span class="n">⚡</span><span class="t"><b>Circuit Lab</b><br><span class="muted tiny">wire &amp; run an Arduino Uno</span></span></button>` + S.progress.map(p => {
     const d = p.req.filter(r => r.done).length, st = p.done ? "done" : d ? "part" : "";
     return `<button class="nav ${p.lab === CUR ? "on" : ""}" data-act="lab" data-n="${p.lab}"><span class="n">${p.lab}</span><span class="t">${esc(p.title)}</span><span class="dot ${st}" title="${d}/${p.req.length} required steps"></span></button>`;
   }).join("");
@@ -118,13 +119,16 @@ function renderTop() {
   $("#topbar").innerHTML = `<span class="pill ${b.running ? "ok" : "warn"}">Board <b>${b.running ? "running ×" + b.speed : "stopped"}</b></span>
    <span class="pill">Sketch <b>${esc(((S.sketches || []).find(s => s.ID === b.sketch) || {}).Name || b.sketch || "")}</b></span>
    <span class="pill">MQTT <b>localhost:${m.port || "?"}</b> · clients <b>${m.clients ?? 0}</b> · ${m.allowAnonymous ? "anonymous allowed" : "authentication required"}</span>
+   <span class="pill click ${(S.student && S.student.name) ? "" : "warn"}" data-act="student">Student <b>${(S.student && S.student.name) ? esc(S.student.name) + " · " + esc(S.student.reg) : "not set – click to enter"}</b></span>
    <span class="pill ${S.logging ? "ok" : ""}">Logger <b>${S.logging ? "recording" : "idle"}</b> · rows <b>${S.rows ?? 0}</b></span>`;
   $("#ver").textContent = "v" + (S.version || "");
   $("#wsPath").textContent = "Files: " + (S.workspace || "");
+  const al = $("#authorLine"); if (al) al.textContent = (S.author || "") + " · " + (S.authorTitle || "") + ", " + (S.authorDept || "");
 }
 function renderGuide() {
+  if (CUR === 0) { $("#guide").innerHTML = ""; return; }
   const L = LABS[CUR - 1], p = S.progress[CUR - 1]; if (!L || !p) return;
-  $("#guide").innerHTML = `<h2>Lab ${L.n}: ${esc(L.title)}</h2><div class="muted small">${esc(L.clo)}</div>
+  $("#guide").innerHTML = `<div class="guide-actions"><button class="btn tiny" data-act="labpdf" data-n="${L.n}" title="Download this lab's report as PDF">⬇ PDF</button><button class="btn tiny ghost" data-act="labreset" data-n="${L.n}" title="Clear this lab so it can be redone">↺ Reset lab</button></div><h2>Lab ${L.n}: ${esc(L.title)}</h2><div class="muted small">${esc(L.clo)}</div>
    <h4>Objectives</h4><ul>${L.obj.map(o => `<li>${esc(o)}</li>`).join("")}</ul>
    <h4>Procedure (from the manual)</h4><ol>${L.steps.map(o => `<li>${esc(o)}</li>`).join("")}</ol>
    <h4>Student task</h4><p>${esc(L.task)}</p>
@@ -134,6 +138,8 @@ function renderGuide() {
 }
 function renderLab() {
   Object.keys(HOOK).forEach(k => delete HOOK[k]);
+  if (typeof CL !== "undefined" && CUR !== 0) CL.stop();
+  $("#content").classList.toggle("wide", CUR === 0);
   renderNav(); renderGuide();
   const P = PANELS[CUR]; const w = $("#work"); w.innerHTML = "";
   if (P) { const r = P(); w.innerHTML = r.html; if (r.init) setTimeout(r.init, 0); }
@@ -212,6 +218,7 @@ function connect() {
       case "tb": HOOK.tb && HOOK.tb(d); break;
       case "tbalarm": toast("ThingsBoard alarm: " + d.rule + " (value " + d.value + ")", true); HOOK.tbalarm && HOOK.tbalarm(d); break;
       case "anomaly": S.anomaly = d; HOOK.anomaly && HOOK.anomaly(d); break;
+      case "reset": HOOK.reset ? HOOK.reset(d) : (window.onSimReset && window.onSimReset(d)); break;
       case "logger": S.rows = d.rows; renderTop(); HOOK.logger && HOOK.logger(d); break;
     }
   };

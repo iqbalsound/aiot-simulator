@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
+
 // AIoT Simulator — a software replacement for the AI-4301 lab kit.
 package main
 
@@ -62,9 +64,14 @@ func main() {
 	serve := flag.Bool("serve", false, "keep running after the browser window is closed")
 	seed := flag.Int64("seed", 0, "random seed for reproducible sensor data (0 = random)")
 	ver := flag.Bool("version", false, "print version and exit")
+	about := flag.Bool("about", false, "print author and license information and exit")
 	flag.Parse()
 	if *ver {
-		fmt.Println("aiot-simulator", Version)
+		fmt.Printf("aiot-simulator %s\nCopyright (c) 2026 %s, %s, %s\n", Version, app.Author, app.AuthorTitle, app.AuthorDept)
+		return
+	}
+	if *about {
+		fmt.Printf("AIoT Simulator %s - companion software for %s %s\nAuthor and course teacher: %s, %s, %s\n\n%s", Version, app.CourseCode, app.CourseName, app.Author, app.AuthorTitle, app.AuthorDept, app.LicenseText())
 		return
 	}
 	dir := *ws
@@ -89,7 +96,7 @@ func main() {
 	a.Addr = ln.Addr().String()
 	srv := &http.Server{Handler: a.Handler(web.FS()), ReadHeaderTimeout: 10 * time.Second}
 	go srv.Serve(ln)
-	fmt.Printf("AIoT Simulator %s\n  Interface : %s\n  Workspace : %s\n", Version, url, dir)
+	fmt.Printf("AIoT Simulator %s  (c) 2026 %s\n  Interface : %s\n  Workspace : %s\n", Version, app.Author, url, dir)
 	if !*noBrowser {
 		openBrowser(url)
 	}

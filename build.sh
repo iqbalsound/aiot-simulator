@@ -9,7 +9,9 @@ PV="${V//-/\~}"   # pre-release tags: 0.1.0-rc1 -> 0.1.0~rc1 (valid for deb and 
 case "$V" in [0-9]*.[0-9]*.[0-9]*) ;; *) echo "version must look like 1.2.3 (got $V)"; exit 1;; esac
 export CGO_ENABLED=0 GOFLAGS=-mod=mod
 rm -rf "$B" dist; mkdir -p "$B/linux" "$B/win" dist
+cp LICENSE internal/app/license.txt; cp LICENSE "$P/COPYING.txt"   # LICENSE is canonical
 go vet ./... && go test ./...
+node --test web-tests/*.test.js
 LD="-s -w -X main.Version=$V"
 GOOS=linux   GOARCH=amd64 go build -trimpath -ldflags "$LD"            -o "$B/linux/aiot-simulator"     ./cmd/aiot-simulator
 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "$LD -H windowsgui" -o "$B/win/aiot-simulator.exe" ./cmd/aiot-simulator
@@ -22,7 +24,8 @@ install -m 0644 "$P/aiot-simulator.desktop" "$D/usr/share/applications/"
 install -m 0644 internal/web/static/icon.svg "$D/usr/share/icons/hicolor/scalable/apps/aiot-simulator.svg"
 install -m 0644 "$B/aiot-simulator.png" "$D/usr/share/icons/hicolor/256x256/apps/"
 install -m 0644 "$P/README.txt" "$D/usr/share/doc/aiot-simulator/README"
-install -m 0644 "$P/COPYING.txt" "$D/usr/share/doc/aiot-simulator/copyright"
+{ printf 'Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/\nUpstream-Name: aiot-simulator\nUpstream-Contact: Iqbal Uddin Khan\n\nFiles: *\nCopyright: 2026 Iqbal Uddin Khan\nLicense: Educational-Use-License-v1\n'; sed -e 's/^$/ ./' -e 's/^/ /' LICENSE; } > "$D/usr/share/doc/aiot-simulator/copyright"
+chmod 0644 "$D/usr/share/doc/aiot-simulator/copyright"
 cat > "$D/DEBIAN/control" <<EOT
 Package: aiot-simulator
 Version: $PV
@@ -31,7 +34,7 @@ Priority: optional
 Architecture: amd64
 Installed-Size: $(du -sk "$D/usr" | cut -f1)
 Recommends: xdg-utils, chromium | chromium-browser | google-chrome-stable | microsoft-edge-stable | firefox
-Maintainer: AI-4301 Course Team <noreply@localhost>
+Maintainer: Iqbal Uddin Khan <noreply@localhost>
 Description: Simulator for the AI-4301 Artificial Intelligence of Things labs
  Replaces the lab kit with software: virtual Arduino and DHT11/PIR/LDR sensors,
  a built-in MQTT 3.1.1 broker, CSV logging and preprocessing, dashboards,

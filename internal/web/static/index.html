@@ -13,9 +13,13 @@
     <div class="brand"><img src="icon.svg" alt="" width="34" height="34"><div><b>AIoT Simulator</b><small id="ver">v0.0.1</small></div></div>
     <nav id="labnav"></nav>
     <div class="side-foot">
-      <button class="btn small" data-act="report">Download evidence report</button>
+      <button class="btn small" data-act="allpdf">⬇ All labs report (PDF)</button>
+      <div class="grid2"><button class="btn small ghost" data-act="student">Student details</button><button class="btn small ghost" data-act="report">Markdown</button></div>
+      <div class="grid2"><button class="btn small ghost" data-act="resetdlg">Reset…</button><button class="btn small ghost" data-act="about">About</button></div>
+      <label class="themepick">Theme <select id="themeSel"></select></label>
       <button class="btn small ghost" data-act="quit">Quit simulator</button>
       <div class="muted tiny" id="wsPath"></div>
+      <div class="muted tiny" id="authorLine"></div>
     </div>
   </aside>
   <main id="main">
@@ -30,8 +34,21 @@
   </aside>
 </div>
 <div id="toast"></div>
+<dialog id="studentDlg"><h3>Student details</h3><p class="muted small">Printed on every PDF report. Stored only on this computer (student.json in your workspace).</p>
+  <div class="grid2"><label>Full name<input id="stName" type="text" maxlength="80" autocomplete="off"></label><label>Registration number<input id="stReg" type="text" maxlength="40" autocomplete="off"></label></div>
+  <label style="margin-top:8px">Section / batch (optional)<input id="stSec" type="text" maxlength="30"></label><div id="stErr" class="note bad" hidden></div>
+  <div class="row"><button class="btn ghost" data-act="dlgclose" data-d="studentDlg">Cancel</button><button class="btn" data-act="studentsave">Save</button></div></dialog>
+<dialog id="aboutDlg"><h3>About AIoT Simulator</h3><div id="aboutBody"></div><div class="row"><button class="btn" data-act="dlgclose" data-d="aboutDlg">Close</button></div></dialog>
+<dialog id="resetDlg"><h3>Reset the whole simulator</h3><p>This stops the board and returns every lab, setting, dataset, model, broker user and device to factory state, so all labs can be done again.</p>
+  <label class="inline"><input type="checkbox" id="rsFiles" checked> Also delete generated files in the workspace (CSV, models, test log, saved circuits)</label>
+  <label class="inline" style="margin-top:6px"><input type="checkbox" id="rsStud"> Also clear the student name and registration number</label>
+  <div class="row"><button class="btn ghost" data-act="dlgclose" data-d="resetDlg">Cancel</button><button class="btn bad" data-act="resetall">Reset everything</button></div></dialog>
 <script src="labs.js"></script>
 <script src="app.js"></script>
 <script src="panels.js"></script>
+<script src="cint.js"></script>
+<script src="circuit-sim.js"></script>
+<script src="circuit-ui.js"></script>
+<script src="shell.js"></script>
 </body>
 </html>

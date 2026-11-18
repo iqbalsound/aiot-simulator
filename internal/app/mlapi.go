@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
+
 package app
 
 import (
@@ -13,6 +15,7 @@ import (
 
 	"aiotsim/internal/ml"
 	"aiotsim/internal/mqtt"
+	"aiotsim/internal/pdf"
 	"aiotsim/internal/sim"
 )
 
@@ -264,16 +267,35 @@ func (a *App) hTrain(r *http.Request) (any, error) {
 		out["comparison"] = map[string]any{"dtAccuracy": dtRep.Accuracy, "thisAccuracy": rep.Accuracy, "better": better}
 		a.mark("second_model", fmt.Sprintf("%s accuracy %.3f vs decision tree %.3f", in.Algo, rep.Accuracy, dtRep.Accuracy))
 	}
+	if in.Algo == "dt" {
+		a.mu.Lock()
+		a.hist["rules_dt"], _ = out["rules"].(string)
+		a.mu.Unlock()
+	}
 	var sb strings.Builder
-	sb.WriteString("## Lab 6 — Supervised learning on the sensor dataset\n\n| Model | Accuracy | Precision | Recall | Confusion [[TN FP][FN TP]] |\n|---|---|---|---|---|\n")
+	sb.WriteString("## Lab 6 — Supervised learning on the sensor dataset\n\nLabel rule: comfortable = 20 <= temperature <= 28 and humidity <= 60. Split 75 / 25.\n\n| Model | Accuracy | Precision | Recall |\n|---|---|---|---|\n")
 	for _, al := range []string{"dt", "rf", "knn"} {
 		a.mu.Lock()
 		rp, ok := a.hist["cmp_"+al].(ml.Report)
 		a.mu.Unlock()
 		if ok {
-			fmt.Fprintf(&sb, "| %s | %.3f | %.3f | %.3f | %v |\n", al, rp.Accuracy, rp.Precision, rp.Recall, rp.Confusion)
+			fmt.Fprintf(&sb, "| %s | %.3f | %.3f | %.3f |\n", al, rp.Accuracy, rp.Precision, rp.Recall)
 		}
 	}
+	for _, al := range []string{"dt", "rf", "knn"} {
+		a.mu.Lock()
+		rp, ok := a.hist["cmp_"+al].(ml.Report)
+		a.mu.Unlock()
+		if ok {
+			c := rp.Confusion
+			fmt.Fprintf(&sb, "\n### Confusion matrix (%s)\n\n| | predicted 0 | predicted 1 |\n|---|---|---|\n| true 0 | %d | %d |\n| true 1 | %d | %d |\n", al, c[0][0], c[0][1], c[1][0], c[1][1])
+		}
+	}
+	a.mu.Lock()
+	if rules, _ := a.hist["rules_dt"].(string); rules != "" {
+		fmt.Fprintf(&sb, "\n### Decision-tree rules\n\n```\n%s```\n", rules)
+	}
+	a.mu.Unlock()
 	a.setHist("lab06", sb.String())
 	return out, nil
 }
@@ -315,6 +337,11 @@ func (a *App) hNNTrain(r *http.Request) (any, error) {
 	a.saveJSON("comfort_model.keras.json", map[string]any{"architecture": fmt.Sprintf("Input(3) -> Dense(%d, relu) -> Dense(1, sigmoid)", in.Hidden),
 		"params": sz.Params, "test_accuracy": acc, "note": "Simulator description of the trained model (not a real .keras archive)"})
 	a.setNNHist()
+	var tr, va, vl []float64
+	for _, h := range logs {
+		tr, va, vl = append(tr, h.Acc), append(va, h.VAcc), append(vl, h.VLoss)
+	}
+	a.setCharts("lab07", chartSpec{Kind: "line", Title: "Training curves", XLabel: "epoch", Series: []pdf.Series{{Name: "train accuracy", Y: tr}, {Name: "validation accuracy", Y: va}, {Name: "validation loss", Y: vl}}})
 	return map[string]any{"history": logs, "testAcc": acc, "params": sz.Params, "kerasBytes": sz.Keras, "hidden": in.Hidden,
 		"normalised": in.Normalise, "lr": in.LR,
 		"summary": fmt.Sprintf("Layer 1: Dense(%d, relu) params %d | Layer 2: Dense(1, sigmoid) params %d | Total %d", in.Hidden, nn.In*in.Hidden+in.Hidden, in.Hidden+1, sz.Params)}, nil
@@ -615,7 +642,9 @@ func (a *App) hAnomalyTrain(r *http.Request) (any, error) {
 	if len(t) > 400 {
 		t, flag = t[:400], flag[:400]
 	}
+	a.setCharts("lab11", chartSpec{Kind: "line", Title: "Temperature with anomalies (red)", XLabel: "row", Series: []pdf.Series{{Name: "temperature", Y: t, Marks: flag}}})
 	out["temp"], out["flags"] = jfs(t), flag
+	a.setHist("lab11", fmt.Sprintf("## Lab 11 — Isolation Forest\n\n- contamination %.2f: %d of %d rows flagged as anomalies\n- injected faults detected: %.0f%%\n", in.Contamination, n, len(X), inject(f)*100))
 	if len(in.Sweep) > 0 {
 		var table []map[string]any
 		for _, c := range in.Sweep {
@@ -757,6 +786,7 @@ func (a *App) hPdm(r *http.Request) (any, error) {
 	out := map[string]any{"window": in.Window, "base": base, "importances": imp, "features": []string{"roll_mean", "roll_std", "roll_max"},
 		"healthy": jfs(cut(healthy)), "degraded": jfs(cut(degraded)), "samplesPerClass": in.N - in.Window + 1,
 		"note": "Overlapping windows leak information between train and test sets, so these scores are optimistic. Discuss this in your report."}
+	a.setCharts("lab12", chartSpec{Kind: "line", Title: "Vibration magnitude (g): healthy vs degraded", XLabel: "sample", Series: []pdf.Series{{Name: "healthy", Y: cut(healthy)}, {Name: "degraded", Y: cut(degraded)}}})
 	a.mark("pdm", fmt.Sprintf("window %d: accuracy %.3f precision %.3f recall %.3f", in.Window, base.Accuracy, base.Precision, base.Recall))
 	md := fmt.Sprintf("## Lab 12 — Predictive maintenance\n\n| Features | Accuracy | Precision | Recall |\n|---|---|---|---|\n| mean, std, max (window %d) | %.3f | %.3f | %.3f |\n", in.Window, base.Accuracy, base.Precision, base.Recall)
 	if in.Extra != "none" {

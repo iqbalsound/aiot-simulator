@@ -6,8 +6,19 @@ Laboratory Manual: virtual Arduino and sensors, a real MQTT 3.1.1 broker, CSV lo
 preprocessing, dashboards, machine learning, TFLite / TFLite-Micro simulation, a ThingsBoard-style
 platform, anomaly detection, predictive maintenance, mini-project testing and benchmarking.
 
+Author and course teacher: **Iqbal Uddin Khan**, Assistant Professor, DIT | FEST - HU.
+
 > Educational tool. Timings, memory and file sizes are estimates. It supplements, and does not
 > replace, supervised work on real hardware.
+
+## Highlights (v0.0.2)
+
+- **Circuit Lab**: drag parts, draw wires, run Arduino sketches on a simulated Uno ([guide](docs/CIRCUIT-LAB.md)).
+- **PDF lab reports** for every lab (and a full portfolio) with the student's **name and registration number**,
+  evidence, results, charts, a reflection prompt and an instructor marks box.
+- **Reset** the whole simulator or any single lab so tasks can be redone.
+- **9 themes** (Ocean Dark, Daylight, Navy & Purple Neon, Solarized, Forest, Sunset, High Contrast, Paper, Auto).
+- About dialog, author, licence and copyright information (`aiot-simulator --about`).
 
 ## Try it without installing (dry run)
 
@@ -16,7 +27,7 @@ Requires Go 1.22+ only.
 ```bash
 git clone git@github.com:<you>/aiot-simulator.git && cd aiot-simulator
 make run                      # or: go run ./cmd/aiot-simulator
-make test                     # unit + API tests with the race detector
+make test                     # Go tests (race detector) + JavaScript tests
 ```
 
 Useful flags: `--no-browser --serve` (run headless, open http://127.0.0.1:8765 yourself),
@@ -67,7 +78,10 @@ internal/sim/         sensors, wiring faults, virtual Arduino
 internal/mqtt/        MQTT 3.1.1 broker and client
 internal/ml/          decision tree, forest, k-NN, neural net + int8, Isolation Forest, rolling features
 internal/app/         HTTP API and lab logic (Labs 1-16), progress tracking, evidence report
-internal/web/static/  browser UI (plain HTML/CSS/JS, no external requests)
+internal/pdf/         dependency-free PDF writer used for lab reports
+internal/web/static/  browser UI (plain HTML/CSS/JS, no external requests); cint.js = sketch interpreter,
+                      circuit-sim.js = electrical model, circuit-ui.js = Circuit Lab editor
+web-tests/            JavaScript tests (node --test)
 packaging/            .desktop file, RPM spec, NSIS script, icons, README/COPYING for installers
 build.sh              reproducible DEB + RPM + Windows build
 ```
@@ -78,7 +92,11 @@ The web UI listens on 127.0.0.1 only, rejects foreign `Host` headers (DNS rebind
 header on every POST. The MQTT broker listens on localhost until "Listen on the local network" is
 ticked in Lab 5; keep authentication on for shared networks.
 
-## Licence
+## Licence and authorship
 
-Placeholder: all rights reserved (see `packaging/COPYING.txt`). Add a `LICENSE` file of your choice
-before making the repository public.
+Copyright (c) 2026 Iqbal Uddin Khan. Released under the **Educational Use License (v1)** in [`LICENSE`](LICENSE):
+free for students and staff of the course, redistribution of unmodified copies allowed for non-commercial teaching,
+modification and commercial use only with the author's written permission. It is a custom licence, not legal advice:
+if you prefer an open-source licence (MIT, Apache-2.0, GPL), replace `LICENSE` and run `./build.sh`, which copies it
+into `internal/app/license.txt` and `packaging/COPYING.txt` (a test fails if the copies drift apart).
+The program contains no third-party code besides the Go standard library (BSD-3-Clause).

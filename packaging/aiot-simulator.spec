@@ -5,8 +5,10 @@
 Name:           aiot-simulator
 Version:        0.0.1
 Release:        1
-Summary:        Simulator for the AI-4301 Artificial Intelligence of Things labs
-License:        Educational use, all rights reserved
+Summary:        Simulator for the AI-4301 Artificial Intelligence of Things labs (by Iqbal Uddin Khan)
+License:        Educational Use License (see LICENSE)
+Packager:       Iqbal Uddin Khan
+URL:            https://localhost/
 BuildArch:      x86_64
 Requires:       xdg-utils
 AutoReqProv:    no
@@ -24,7 +26,7 @@ install -D -m 0644 %{_sourcedir}/aiot-simulator.desktop %{buildroot}%{_datadir}/
 install -D -m 0644 %{_sourcedir}/aiot-simulator.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/aiot-simulator.svg
 install -D -m 0644 %{_sourcedir}/aiot-simulator.png %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/aiot-simulator.png
 install -D -m 0644 %{_sourcedir}/README.txt %{buildroot}%{_docdir}/%{name}/README.txt
-install -D -m 0644 %{_sourcedir}/COPYING.txt %{buildroot}%{_docdir}/%{name}/COPYING.txt
+install -D -m 0644 %{_sourcedir}/COPYING.txt %{buildroot}%{_datadir}/licenses/%{name}/LICENSE
 
 %post
 gtk-update-icon-cache -q -t -f %{_datadir}/icons/hicolor >/dev/null 2>&1 || :
@@ -40,8 +42,10 @@ update-desktop-database -q %{_datadir}/applications >/dev/null 2>&1 || :
 %{_datadir}/icons/hicolor/scalable/apps/aiot-simulator.svg
 %{_datadir}/icons/hicolor/256x256/apps/aiot-simulator.png
 %doc %{_docdir}/%{name}/README.txt
-%doc %{_docdir}/%{name}/COPYING.txt
+%license %{_datadir}/licenses/%{name}/LICENSE
 
 %changelog
-* Mon Nov 16 2026 AI-4301 Course Team - 0.0.1-1
+* Tue Nov 17 2026 Iqbal Uddin Khan - 0.0.2-1
+- Circuit Lab, PDF lab reports, resets, themes, author and licence information
+* Mon Nov 16 2026 Iqbal Uddin Khan - 0.0.1-1
 - Initial release

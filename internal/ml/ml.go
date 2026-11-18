@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
+
 // Package ml contains the small machine-learning toolkit behind Labs 6, 7, 11 and 12:
 // decision tree, random forest, k-NN, a tiny neural network with int8 quantisation,
 // Isolation Forest, evaluation metrics and rolling-window feature helpers.

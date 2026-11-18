@@ -1,4 +1,5 @@
 "use strict";
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
 // Workbenches for each lab. Each PANELS[n] returns {html, init}.
 const card = (title, body, extra = "") => `<div class="card ${extra}"><h3>${title}</h3>${body}</div>`;
 const code = t => `<pre>${esc(t)}</pre>`;
@@ -41,7 +42,7 @@ const SKETCH_CODE = {
   combined_extra: "// combined + HC-SR04 distance as a fifth field\n  ...\n  Serial.print(lightRaw); Serial.print(\",\");\n  Serial.println(distanceCm);"
 };
 PANELS[2] = () => ({
-  html: card("Wiring table", `<p class="muted small">Pick the microcontroller pin for each sensor, as you would on the breadboard.</p><div id="wiring"></div>
+  html: card("Build it visually", `<p class="small">Prefer to see the breadboard? The <b>Circuit Lab</b> lets you drag the DHT11, PIR and LDR, draw the wires yourself and run the real sketch.</p><button class="btn" data-act="circ2">⚡ Open the Lab 2 wiring exercise</button>`) + card("Wiring table", `<p class="muted small">Pick the microcontroller pin for each sensor, as you would on the breadboard.</p><div id="wiring"></div>
     <div class="row" style="margin-top:8px"><button class="btn" data-act="l2wire">Apply wiring &amp; check</button></div><div id="wcheck"></div>`) +
     card("Sketch &amp; live reading", `<div class="row">${sel("l2sketch", "Sketch to upload", (S.sketches || []).map(s => [s.ID, s.Name]), (S.board || {}).sketch)}<button class="btn" data-act="l2up">Upload &amp; run</button></div><div id="l2code"></div>
       <div id="l2ldr" class="grid3"></div><p class="muted small">Tip: if the Serial Monitor baud (right panel) differs from <span class="mono">Serial.begin()</span>, you will see garbage – exactly as on real hardware.</p>`),

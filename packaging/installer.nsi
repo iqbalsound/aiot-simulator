@@ -28,7 +28,8 @@ VIProductVersion "0.0.1.0"
 VIAddVersionKey "ProductName" "${APP}"
 VIAddVersionKey "FileDescription" "${APP} installer"
 VIAddVersionKey "FileVersion" "${VER}"
-VIAddVersionKey "LegalCopyright" "Educational use, all rights reserved"
+VIAddVersionKey "CompanyName" "Iqbal Uddin Khan"
+VIAddVersionKey "LegalCopyright" "Copyright (c) 2026 Iqbal Uddin Khan. Educational Use License."
 
 Function .onInit
   ${IfNot} ${RunningX64}
@@ -55,7 +56,7 @@ Section "Install"
   WriteRegStr HKLM "Software\AIoTSimulator" "InstallDir" "$INSTDIR"
   WriteRegStr HKLM "${UNKEY}" "DisplayName" "${APP}"
   WriteRegStr HKLM "${UNKEY}" "DisplayVersion" "${VER}"
-  WriteRegStr HKLM "${UNKEY}" "Publisher" "AI-4301 Course"
+  WriteRegStr HKLM "${UNKEY}" "Publisher" "Iqbal Uddin Khan"
   WriteRegStr HKLM "${UNKEY}" "DisplayIcon" "$INSTDIR\aiot-simulator.ico"
   WriteRegStr HKLM "${UNKEY}" "InstallLocation" "$INSTDIR"
   WriteRegStr HKLM "${UNKEY}" "UninstallString" '"$INSTDIR\Uninstall.exe"'

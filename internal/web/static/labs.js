@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
 // Guide text for AI-4301 Labs 1-16, condensed from the Laboratory Manual (v1.0).
 // "sim" notes explain how the simulator stands in for physical hardware.
 const LABS = [
@@ -10,7 +11,7 @@ const LABS = [
  obj:["Wire a DHT11, a PIR sensor and an LDR to a microcontroller.","Read each sensor over the serial connection.","Combine them into one structured CSV line per cycle."],
  steps:["DHT11: VCC→5V, GND→GND, DATA→D2.","PIR: VCC→5V, GND→GND, OUT→D3.","LDR voltage divider: LDR 5V→A0, 10 kΩ A0→GND.","Upload the DHT-only sketch; open the Serial Monitor at 9600 baud and confirm plausible readings.","Extend to the PIR, then to the LDR (DARK < 300 ≤ DIM < 700 ≤ BRIGHT).","Combine everything into one line: temperature,humidity,motion,light."],
  task:"Add a further sensor (e.g. HC-SR04 distance) on a free pin and print it as an extra field on the same line.",
- sim:"Choose the pins in the wiring table. A sensor on the wrong pin really fails (nan, stuck 0, or a floating analog input)."},
+ sim:"Choose the pins in the wiring table, or draw the wires yourself in the Circuit Lab. A sensor on the wrong pin really fails (nan, stuck 0, or a floating analog input)."},
 {n:3,title:"Sensor Data Collection and Preprocessing",clo:"Lab CLO-1 (GA-2, P3)",
  obj:["Capture the serial stream and log it to a CSV file with timestamps.","Clean the data with Pandas-style operations.","Smooth noisy readings with a rolling mean."],
  steps:["Make sure the combined sketch is running and wired correctly.","Run the logger (log_sensors.py) for at least five minutes / 200 rows while varying light and temperature.","Load the CSV: head(), info(), describe().","Remove or interpolate missing / malformed rows.","Add temp_smoothed = rolling mean (window 5) and plot raw vs smoothed."],

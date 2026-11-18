@@ -2,7 +2,7 @@
 Type=Application
 Name=AIoT Simulator
 GenericName=AI-4301 Lab Simulator
-Comment=Virtual sensors, MQTT broker and ML labs for Artificial Intelligence of Things (AI-4301)
+Comment=Virtual boards, sensors, MQTT broker, ML labs and PDF lab reports for AI-4301 (by Iqbal Uddin Khan)
 Exec=aiot-simulator
 Icon=aiot-simulator
 Terminal=false

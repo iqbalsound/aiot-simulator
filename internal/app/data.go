@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
+
 package app
 
 import (
@@ -12,6 +14,7 @@ import (
 	"time"
 
 	"aiotsim/internal/ml"
+	"aiotsim/internal/pdf"
 	"aiotsim/internal/sim"
 )
 
@@ -397,6 +400,9 @@ func (a *App) hPreprocess(r *http.Request) (any, error) {
 		a.mark("median", "3-point median vs rolling mean on light")
 	}
 	a.setHist("lab03", fmt.Sprintf("## Lab 3 — Data collection and preprocessing\n\n- Rows logged: %d (%s)\n- Cleaning (%s): %d rows kept; %d NaN readings, %d non-numeric lines, %d temperature spikes\n- Rolling-mean window: %d\n", n, a.dataSource, in.Mode, len(kept), nanRows, coerced, spikes, in.Window))
+	a.setCharts("lab03",
+		chartSpec{Kind: "line", Title: "Temperature: raw vs rolling mean", XLabel: "sample number (deg C)", Series: []pdf.Series{{Name: "raw", Y: tail(c.Temp, 300)}, {Name: fmt.Sprintf("smoothed (window %d)", in.Window), Y: tail(c.Smooth, 300)}}},
+		chartSpec{Kind: "line", Title: "Light: raw vs median(3) vs rolling mean(3)", XLabel: "sample number (ADC)", Series: []pdf.Series{{Name: "raw", Y: tail(c.Light, 300)}, {Name: "median(3)", Y: tail(c.LightMd, 300)}, {Name: "rolling mean(3)", Y: tail(c.LightRM, 300)}}})
 	cut := func(v []float64) []float64 {
 		if len(v) > 400 {
 			return v[len(v)-400:]

@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
+
 package app
 
 import (
@@ -373,6 +375,16 @@ func (a *App) hBench(r *http.Request) (any, error) {
 		"inference":    "Inference dominates: shrink the model (quantisation, pruning, shallower tree) or run it on faster hardware.",
 		"actuation":    "Actuation dominates: use a solid-state relay or reduce relay settling time.",
 	}[names[bi]]
+	hl := make([]string, 10)
+	for i := range hl {
+		hl[i] = fmt.Sprintf("%.0f", lo+float64(i)*w)
+	}
+	hv := make([]float64, 10)
+	for i, b := range bins {
+		hv[i] = float64(b)
+	}
+	a.setCharts("lab15", chartSpec{Kind: "bar", Title: "Mean latency per stage (ms)", Labels: names, Values: means},
+		chartSpec{Kind: "bar", Title: "Response-time histogram (ms, bin start)", Labels: hl, Values: hv})
 	a.mark("bench", fmt.Sprintf("%d trials, %s inference over %s: mean %.1f ms, std %.1f ms, accuracy %.3f", in.Trials, in.Where, in.Link, ml.Mean(tot), ml.Std(tot), rep.Accuracy))
 	a.setHist("lab15", fmt.Sprintf("## Lab 15 — Benchmark (%s, inference at %s, link %s)\n\n| Metric | Value |\n|---|---|\n| Trials | %d |\n| Mean response time | %.2f ms |\n| Std dev | %.2f ms |\n| 95th percentile | %.2f ms |\n| Held-out accuracy | %.3f (precision %.3f, recall %.3f) |\n| Inference time | %.3f ms |\n| Model size (est.) | %d bytes |\n| Largest latency contributor | %s |\n",
 		p.Name, in.Where, in.Link, in.Trials, ml.Mean(tot), ml.Std(tot), ml.Percentile(tot, 95), rep.Accuracy, rep.Precision, rep.Recall, ml.Mean(inf), modelBytes, names[bi]))

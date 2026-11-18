@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
+
 package app
 
 import (
@@ -91,6 +93,50 @@ func TestEndToEndAPI(t *testing.T) {
 	}
 	if m := call(t, srv, "/api/project/run", map[string]any{"template": "irrigation", "validate": false}); m["passed"] == m["total"] {
 		t.Fatal("without validation the fault scenarios must fail")
+	}
+	// student details, PDF export and resets
+	if m := call(t, srv, "/api/student", map[string]any{"name": "A", "reg": "1"}); m["error"] == nil {
+		t.Fatal("invalid student must be rejected")
+	}
+	r2, _ := http.Get(srv.URL + "/api/report.pdf?lab=3")
+	if r2.StatusCode != 400 {
+		t.Fatalf("PDF without student must be 400, got %d", r2.StatusCode)
+	}
+	call(t, srv, "/api/student", map[string]any{"name": "Ali Raza", "reg": "2023-CS-001", "section": "A"})
+	for _, q := range []string{"3", "6", "7", "all"} {
+		r3, err := http.Get(srv.URL + "/api/report.pdf?lab=" + q)
+		if err != nil || r3.StatusCode != 200 || r3.Header.Get("Content-Type") != "application/pdf" {
+			t.Fatalf("pdf lab=%s: %v %v", q, err, r3.StatusCode)
+		}
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(r3.Body)
+		if !bytes.HasPrefix(buf.Bytes(), []byte("%PDF-")) || buf.Len() < 3000 {
+			t.Fatalf("pdf lab=%s too small: %d", q, buf.Len())
+		}
+	}
+	call(t, srv, "/api/reset", map[string]any{"scope": "lab", "lab": 6})
+	st0 := call(t, srv, "/api/state", nil)
+	for _, p := range st0["progress"].([]any) {
+		pm := p.(map[string]any)
+		if pm["lab"].(float64) == 6 && pm["done"] == true {
+			t.Fatal("lab 6 should be reset")
+		}
+		if pm["lab"].(float64) == 3 && pm["done"] != true {
+			t.Fatal("lab 3 must stay complete after resetting lab 6")
+		}
+	}
+	call(t, srv, "/api/reset", map[string]any{"scope": "all", "files": true})
+	st1 := call(t, srv, "/api/state", nil)
+	if st1["rows"].(float64) != 0 {
+		t.Fatal("rows must be cleared")
+	}
+	for _, p := range st1["progress"].([]any) {
+		if p.(map[string]any)["done"] == true {
+			t.Fatal("nothing may be complete after full reset")
+		}
+	}
+	if call(t, srv, "/api/student", nil)["name"] != "Ali Raza" {
+		t.Fatal("student details must survive a normal reset")
 	}
 	st := call(t, srv, "/api/state", nil)
 	if st["version"] != "test" {

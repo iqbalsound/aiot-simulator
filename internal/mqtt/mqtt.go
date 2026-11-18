@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
+
 // Package mqtt is a small, dependency-free MQTT 3.1.1 broker and client used by
 // the AIoT Simulator. It implements the subset required by AI-4301 Labs 5, 10, 11:
 // CONNECT (with username/password), PUBLISH (QoS 0/1/2 inbound, retained),

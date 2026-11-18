@@ -1,0 +1,29 @@
+AIoT Simulator - Educational Use License (v1)
+
+Copyright (c) 2026 Iqbal Uddin Khan, Assistant Professor, DIT | FEST - HU.
+All rights reserved.
+
+1. Permission. The author grants students and staff taking or teaching the course
+   AI-4301 (Artificial Intelligence of Things) permission, free of charge, to install,
+   run and copy this software ("the Software") for learning, teaching and assessment.
+
+2. Redistribution. You may redistribute the unmodified Software (installers or source)
+   for non-commercial educational purposes, provided that this notice and the author's
+   name are kept intact.
+
+3. Modification and commercial use. Modified versions, derivative works, public
+   redistribution of modified versions, and any commercial use require the prior written
+   permission of the author.
+
+4. Your work. Lab reports, data files and models that you generate with the Software
+   belong to you.
+
+5. Third-party software. The Software is built with the Go programming language and its
+   standard library, Copyright (c) The Go Authors, distributed under the BSD 3-Clause
+   License. No other third-party code is included.
+
+6. No warranty. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED. The simulator emulates hardware and cloud services for teaching; timings,
+   memory sizes and file sizes are estimates and do not replace supervised work on real
+   hardware. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM OR DAMAGES ARISING FROM
+   USE OF THE SOFTWARE.
