@@ -16,14 +16,13 @@
       <button class="btn small" data-act="allpdf">⬇ All labs report (PDF)</button>
       <div class="grid2"><button class="btn small ghost" data-act="student">Student details</button><button class="btn small ghost" data-act="report">Markdown</button></div>
       <div class="grid2"><button class="btn small ghost" data-act="resetdlg">Reset…</button><button class="btn small ghost" data-act="about">About</button></div>
-      <label class="themepick">Theme <select id="themeSel"></select></label>
       <button class="btn small ghost" data-act="quit">Quit simulator</button>
       <div class="muted tiny" id="wsPath"></div>
       <div class="muted tiny" id="authorLine"></div>
     </div>
   </aside>
   <main id="main">
-    <header id="topbar"></header>
+    <div class="toprow"><header id="topbar"></header><label class="themepick" title="Change the colour theme">🎨 Theme <select id="themeSel"></select></label></div>
     <div id="content"><section id="guide" class="card"></section><section id="work"></section></div>
     <section id="console" class="card"><div class="row"><b>Event log</b><span class="spacer"></span><button class="btn tiny ghost" data-act="clearlog">Clear</button></div><div id="logbox"></div></section>
   </main>

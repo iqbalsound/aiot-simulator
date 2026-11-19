@@ -1,4 +1,4 @@
-AIoT Simulator v0.0.2  -  AI-4301 Artificial Intelligence of Things
+AIoT Simulator v0.0.3  -  AI-4301 Artificial Intelligence of Things
 ====================================================================
 Author and course teacher: Iqbal Uddin Khan, Assistant Professor, DIT | FEST - HU
 Copyright (c) 2026 Iqbal Uddin Khan. Educational Use License (see COPYING.txt / LICENSE).
@@ -9,11 +9,12 @@ What it is
   CSV logging and preprocessing, dashboards, ML training, TFLite / TFLite-Micro simulation,
   a ThingsBoard-style platform, anomaly detection, predictive maintenance, mini-project testing,
   benchmarking and PDF lab reports with your name and registration number.
+  Fifteen colour themes: pick one from the Theme list in the top bar.
 
 Install
-  Debian / Ubuntu / Kubuntu :  sudo apt install ./aiot-simulator_0.0.2_amd64.deb
-  Fedora / Rocky / RHEL     :  sudo dnf install ./aiot-simulator-0.0.2-1.x86_64.rpm
-  Windows 10/11 (64-bit)    :  run AIoT-Simulator-0.0.2-setup.exe
+  Debian / Ubuntu / Kubuntu :  sudo apt install ./aiot-simulator_0.0.3_amd64.deb
+  Fedora / Rocky / RHEL     :  sudo dnf install ./aiot-simulator-0.0.3-1.x86_64.rpm
+  Windows 10/11 (64-bit)    :  run AIoT-Simulator-0.0.3-setup.exe
                                (SmartScreen may warn: the installer is not code-signed. Choose More info > Run anyway.)
 
 First steps

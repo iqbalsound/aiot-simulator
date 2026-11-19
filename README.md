@@ -1,5 +1,7 @@
 # AIoT Simulator
 
+![CI](https://github.com/YOUR-USER/aiot-simulator/actions/workflows/ci.yml/badge.svg)
+
 Software replacement for the **AI-4301 Artificial Intelligence of Things** lab kit. One self-contained
 program (Go, no runtime dependencies) with a local web interface that simulates Labs 1-16 of the
 Laboratory Manual: virtual Arduino and sensors, a real MQTT 3.1.1 broker, CSV logging and
@@ -11,13 +13,13 @@ Author and course teacher: **Iqbal Uddin Khan**, Assistant Professor, DIT | FEST
 > Educational tool. Timings, memory and file sizes are estimates. It supplements, and does not
 > replace, supervised work on real hardware.
 
-## Highlights (v0.0.2)
+## Highlights
 
 - **Circuit Lab**: drag parts, draw wires, run Arduino sketches on a simulated Uno ([guide](docs/CIRCUIT-LAB.md)).
 - **PDF lab reports** for every lab (and a full portfolio) with the student's **name and registration number**,
   evidence, results, charts, a reflection prompt and an instructor marks box.
 - **Reset** the whole simulator or any single lab so tasks can be redone.
-- **9 themes** (Ocean Dark, Daylight, Navy & Purple Neon, Solarized, Forest, Sunset, High Contrast, Paper, Auto).
+- **15 themes** (picker in the top bar): Ocean Dark, Navy & Purple Neon, Dracula, Nord, Solarized, Mocha, Forest, Sunset, Matrix Terminal, High Contrast, Daylight, Sky Light, Rose Light, Paper (print friendly) and Auto.
 - About dialog, author, licence and copyright information (`aiot-simulator --about`).
 
 ## Try it without installing (dry run)
@@ -58,16 +60,19 @@ sudo apt install golang-go dpkg-dev fakeroot rpm nsis python3-pil
 
 ## CI and releases
 
+Step-by-step (SSH keys, first push, reading CI, releasing, troubleshooting): **[docs/GITHUB-GUIDE.md](docs/GITHUB-GUIDE.md)**.
+
 | Workflow | Trigger | What it does |
 |---|---|---|
 | `ci.yml` | push to `main`, pull requests, manual | gofmt, vet, tests (race detector) -> builds DEB, RPM and Windows installer -> smoke-tests them: DEB on Ubuntu, RPM in a Rocky Linux 9 container, installer on a Windows runner (silent install, start, API check, uninstall) -> uploads the *installers* artifact |
-| `release.yml` | push of a tag `v*` | builds with the version taken from the tag and publishes a GitHub Release with all files |
+| `release.yml` | push of a tag `v*` | checks the tag matches `VERSION`, runs the tests, builds with the version from the tag, takes the release notes from `CHANGELOG.md` and publishes a GitHub Release with the installers and `SHA256SUMS` (tags like `v0.1.0-rc1` become pre-releases) |
 
 Make a release:
 
 ```bash
-echo 0.0.2 > VERSION && git commit -am "Release 0.0.2"
-git tag v0.0.2 && git push origin main v0.0.2
+echo 0.0.4 > VERSION   # also add a section to CHANGELOG.md
+git commit -am "Release 0.0.4" && git push
+git tag -a v0.0.4 -m "AIoT Simulator 0.0.4" && git push origin v0.0.4
 ```
 
 ## Layout

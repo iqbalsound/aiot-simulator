@@ -2,7 +2,9 @@
 // Copyright (c) 2026 Iqbal Uddin Khan. See LICENSE.
 // Themes, student details, About, reset and PDF download.
 
-const THEMES = [["auto", "Auto (follow system)"], ["ocean", "Ocean Dark"], ["daylight", "Daylight"], ["neon", "Navy & Purple Neon"], ["solar", "Solarized Dark"], ["forest", "Forest"], ["sunset", "Sunset"], ["contrast", "High Contrast"], ["paper", "Paper (print friendly)"]];
+const THEMES = [["auto", "Auto (follow system)"],
+  ["ocean", "Ocean Dark", "dark"], ["neon", "Navy & Purple Neon", "dark"], ["dracula", "Dracula", "dark"], ["nord", "Nord", "dark"], ["solar", "Solarized Dark", "dark"], ["mocha", "Mocha (warm dark)", "dark"], ["forest", "Forest", "dark"], ["sunset", "Sunset", "dark"], ["matrix", "Matrix Terminal", "dark"], ["contrast", "High Contrast", "dark"],
+  ["daylight", "Daylight", "light"], ["sky", "Sky Light", "light"], ["rose", "Rose Light", "light"], ["paper", "Paper (print friendly)", "light"]];
 const lsGet = k => { try { return localStorage.getItem(k) || ""; } catch { return ""; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch { } };
 const openDlg = id => { const d = document.getElementById(id); if (!d) return; d.showModal ? d.showModal() : d.setAttribute("open", ""); };
@@ -18,7 +20,8 @@ function applyTheme(choice) {
 function initThemes() {
   const sel = $("#themeSel"); if (!sel) return;
   const cur = lsGet("aiot.theme") || "auto";
-  sel.innerHTML = THEMES.map(([v, t]) => `<option value="${v}" ${v === cur ? "selected" : ""}>${esc(t)}</option>`).join("");
+  const opt = ([v, t]) => `<option value="${v}" ${v === cur ? "selected" : ""}>${esc(t)}</option>`;
+  sel.innerHTML = opt(THEMES[0]) + `<optgroup label="Dark">${THEMES.filter(t => t[2] === "dark").map(opt).join("")}</optgroup><optgroup label="Light">${THEMES.filter(t => t[2] === "light").map(opt).join("")}</optgroup>`;
   sel.onchange = () => { lsSet("aiot.theme", sel.value); applyTheme(sel.value); };
   applyTheme(cur);
   if (window.matchMedia) { try { matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => { if ((lsGet("aiot.theme") || "auto") === "auto") applyTheme("auto"); }); } catch { } }

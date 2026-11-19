@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -45,6 +49,7 @@ jobs:
           name: installers
           path: dist/*
           if-no-files-found: error
+          retention-days: 14
 
   smoke-deb:
     needs: package

@@ -1,12 +1,17 @@
 name: Release
 
-# Push a tag such as v0.0.2 to build the installers and publish a GitHub Release.
+# Push a tag such as v0.0.3 (or v0.1.0-rc1 for a pre-release) to build the installers
+# and publish a GitHub Release. build.sh runs vet, Go tests and JavaScript tests first.
 on:
   push:
     tags: ['v*']
 
 permissions:
   contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -16,13 +21,25 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Tag must match the VERSION file
+        run: |
+          tagver="${GITHUB_REF_NAME#v}"; file="$(cat VERSION)"
+          case "$tagver" in "$file"|"$file"-*) ;; *) echo "::error::tag $GITHUB_REF_NAME does not match VERSION ($file). Edit VERSION, commit, and re-tag."; exit 1;; esac
       - name: Install packaging tools
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fakeroot rpm nsis python3-pil
-      - name: Build (version taken from the tag)
+      - name: Build (tests run first; version comes from the tag)
         run: ./build.sh "${GITHUB_REF_NAME#v}"
+      - name: Release notes from CHANGELOG.md
+        run: |
+          base="${GITHUB_REF_NAME#v}"; base="${base%%-*}"
+          awk -v v="$base" 'index($0, "## [" v "]") == 1 {p=1; next} /^## \[/ {p=0} p' CHANGELOG.md > release_notes.md
+          [ -s release_notes.md ] || echo "Release $GITHUB_REF_NAME" > release_notes.md
+          cat release_notes.md
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
+          body_path: release_notes.md
           generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
           fail_on_unmatched_files: true

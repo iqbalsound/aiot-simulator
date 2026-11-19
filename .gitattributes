@@ -1,0 +1,11 @@
+# Keep LF line endings so build.sh and packaging files work when cloned on Windows
+* text=auto eol=lf
+*.sh text eol=lf
+*.nsi text eol=lf
+*.spec text eol=lf
+*.exe binary
+*.deb binary
+*.rpm binary
+*.ico binary
+*.png binary
+*.gz binary
