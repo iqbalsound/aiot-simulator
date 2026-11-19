@@ -55,7 +55,7 @@ jobs:
     needs: package
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with: { name: installers }
       - name: Install the DEB and start the simulator
         run: |
@@ -72,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     container: rockylinux:9
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with: { name: installers }
       - name: Install the RPM and start the simulator
         run: |
@@ -88,7 +88,7 @@ jobs:
     needs: package
     runs-on: windows-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with: { name: installers }
       - name: Silent install, run, uninstall
         shell: pwsh
