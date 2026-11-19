@@ -44,7 +44,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fakeroot rpm nsis python3-pil
       - name: Build binaries and installers
         run: ./build.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: installers
           path: dist/*
